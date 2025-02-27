@@ -21,9 +21,9 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install setuptools wheel twine
+          pip install setuptools setuptools_scm wheel twine
 
-      - name: Build package
+      - name: Build package (Auto Versioned)
         run: |
           python setup.py sdist bdist_wheel
 
@@ -39,9 +39,17 @@ jobs:
           sudo apt update
           sudo apt install gh -y
 
-      - name: Create GitHub Release
+      - name: Generate Release Notes
+        id: release_notes
+        run: |
+          VERSION=$(python setup.py --version)  # Auto-detected version from Git
+          RELEASE_NOTES=$(git log --no-merges --pretty=format:"* %s by %an in #%h" $(git describe --tags --abbrev=0)..HEAD)
+          echo "::set-output name=notes::${RELEASE_NOTES}"
+
+      - name: Create GitHub Release (Auto Versioned)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # GitHub auto-generated token
         run: |
-          VERSION=$(git describe --tags)
-          gh release create $VERSION dist/* --title "$VERSION" --notes "Release $VERSION"
+          VERSION=$(python setup.py --version)  # Auto-detected version from Git
+          RELEASE_NOTES="${{ steps.release_notes.outputs.notes }}"
+          gh release create $VERSION dist/* --title "$VERSION" --notes "$RELEASE_NOTES"

@@ -1,5 +1,6 @@
 ```bash
 pytenter/
+├── .github/                      # for gh actions 
 ├── pytenter/                     # Main package folder 
 │   ├── __init__.py               # Makes the folder a package
 │   └── pytenter.py               # the main code

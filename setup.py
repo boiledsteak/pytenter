@@ -1,11 +1,9 @@
-# -*- coding: utf-8 -*-
-"""Builds package for release"""
-
 from setuptools import setup, find_packages
 
 setup(
     name="pytenter",
-    version="0.1.0",  
+    use_scm_version=True,  # Auto-fetch version from Git
+    setup_requires=["setuptools_scm"],  # Required for versioning
     description="pdfjinja fork with updated libraries",
     long_description=open('README.md').read(),
     long_description_content_type="text/markdown",
