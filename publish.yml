@@ -1,0 +1,36 @@
+name: Publish to PyPI and Create GitHub Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'  # Trigger on version tags like v1.0.0
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install setuptools wheel twine
+
+      - name: Build and upload package to PyPI
+        run: |
+          python setup.py sdist bdist_wheel
+          twine upload --repository-url https://upload.pypi.org/legacy/ dist/*  # Push to PyPI
+
+      - name: Create GitHub Release
+        run: |
+          VERSION=$(git describe --tags)
+          gh release create $VERSION dist/* --title "$VERSION" --notes "Release $VERSION"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Required for authentication with GitHub API
