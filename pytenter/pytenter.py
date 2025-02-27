@@ -19,9 +19,13 @@ from pdfminer.pdftypes import PDFObjRef
 from pdfminer.layout import LAParams
 from pdfminer.converter import PDFPageAggregator
 from PIL import Image, ImageDraw, ImageFont
-from PyPDF2 import PdfFileWriter, PdfFileReader
+from pypdf import PdfReader, PdfWriter  # Updated to pypdf
+
+
+# old version of reportlab has sec vulns. make sure package uses latest
 from reportlab.lib.utils import ImageReader
 from reportlab.pdfgen import canvas
+
 from subprocess import Popen, PIPE
 try:
     from cStringIO import StringIO as BytesIO
@@ -98,8 +102,7 @@ class Attachment(object):
             pdf.drawImage(ImageReader(self.label), x, y, w, h)
 
         pdf.save()
-        return PdfFileReader(stream).getPage(0)
-
+        return PdfReader(stream).pages[0]  # Updated to PdfReader
 
 class PdfJinja(object):
 
@@ -237,18 +240,18 @@ class PdfJinja(object):
                         field = field.decode('utf-8')
                     self.rendered[field] = rendered_field
 
-        filled = PdfFileReader(self.exec_pdftk(self.rendered))
+        filled = PdfReader(self.exec_pdftk(self.rendered))  # Updated to PdfReader
         for pagenumber, watermark in self.watermarks:
-            page = filled.getPage(pagenumber)
-            page.mergePage(watermark)
+            page = filled.pages[pagenumber]  # Updated to pages
+            page.merge_page(watermark)  # Updated to merge_page
 
-        output = PdfFileWriter()
-        pages = pages or range(filled.getNumPages())
+        output = PdfWriter()
+        pages = pages or range(len(filled.pages))  # Updated to len(filled.pages)
         for p in pages:
-            output.addPage(filled.getPage(p))
+            output.add_page(filled.pages[p])  # Updated to add_page
 
         for attachment in attachments:
-            output.addBlankPage().mergePage(attachment.pdf())
+            output.add_blank_page().merge_page(attachment.pdf())  # Updated to add_blank_page
 
         return output
 
