@@ -10,6 +10,8 @@ setup(
     author="Timothy",
     url="https://github.com/boiledsteak/pytenter",
     packages=find_packages(),
+    py_modules=["pdfjinja"],
+    entry_points={"console_scripts": ["pdfjinja = pdfjinja:main"]},
     install_requires=[
         "jinja2==3.1.5",
         "pdfminer.six==20240706",
