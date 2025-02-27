@@ -23,14 +23,25 @@ jobs:
           python -m pip install --upgrade pip
           pip install setuptools wheel twine
 
-      - name: Build and upload package to PyPI
+      - name: Build package
         run: |
           python setup.py sdist bdist_wheel
-          twine upload --repository-url https://upload.pypi.org/legacy/ dist/*  # Push to PyPI
+
+      - name: Upload package to PyPI
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+        run: |
+          twine upload --repository pypi dist/*  # Push to PyPI using API token
+
+      - name: Install GitHub CLI
+        run: |
+          sudo apt update
+          sudo apt install gh -y
 
       - name: Create GitHub Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # GitHub auto-generated token
         run: |
           VERSION=$(git describe --tags)
           gh release create $VERSION dist/* --title "$VERSION" --notes "Release $VERSION"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Required for authentication with GitHub API
