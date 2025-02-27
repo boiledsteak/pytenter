@@ -39,18 +39,9 @@ jobs:
           sudo apt update
           sudo apt install gh -y
 
-      - name: Generate Changelog
-        run: |
-          VERSION=$(git describe --tags)
-          echo "VERSION=$VERSION" >> $GITHUB_ENV  # Set the VERSION as an environment variable
-          # Generate changelog using git log, you can adjust the format
-          changelog=$(git log $VERSION..HEAD --oneline --no-merges)
-          echo "CHANGELOG=$changelog" >> $GITHUB_ENV  # Set the changelog as an environment variable
-
       - name: Create GitHub Release
         run: |
           VERSION=$(git describe --tags)
-          CHANGELOG=${{ env.CHANGELOG }}
-          gh release create $VERSION dist/* --title "$VERSION" --notes "What's Changed:\n$CHANGELOG\nFull Changelog: $VERSION...HEAD"
+          gh release create $VERSION dist/* --title "$VERSION"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # GitHub auto-generated token
